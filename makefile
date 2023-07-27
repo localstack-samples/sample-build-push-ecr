@@ -39,23 +39,15 @@ local-toplevel-destroy: destroy
 local-toplevel-preview: pulumi-preview
 local-toplevel-outputs: pulumi-outputs
 
-local-lsgdc-deploy: build up-deploy
-local-lsgdc-destroy: destroy
-local-lsgdc-outputs: pulumi-outputs
-local-lsgdc-test: test
-local-lsgdc-unittest: unittest
+local-ecr-deploy: up-deploy
+local-ecr-destroy: destroy
+local-ecr-outputs: pulumi-outputs
+local-ecr-test: test
+local-ecr-unittest: unittest
 
-
-local-db-deploy: up-deploy
-local-db-destroy: destroy
-
-local-jump-deploy: up-deploy
-local-jump-destroy: destroy
 
 local-destroy-all:
-	make local-jump-destroy
-	make local-lsgdc-destroy
-	make local-db-destroy
+	make local-ecr-destroy
 	make local-toplevel-destroy
 
 iac-shared:

@@ -36,11 +36,10 @@ vpcDef.tags = Object.assign({}, commonTags, {Name: `${regionConfig?.vpcName}-${s
 vpcDef.enableDnsHostnames = true;
 // Create isolated subnets. We're using Centralized outbound routing through the Network Service account
 vpcDef.subnetSpecs = [
-    {type: SubnetType.Private, name: "priv",  cidrMask: vpcDef.subnetCidrMask},
+    {type: SubnetType.Private, name: "priv"},
     {
         type: SubnetType.Public,
-        name: "pub",
-        cidrMask: vpcDef.subnetCidrMask
+        name: "pub"
     }];
 vpcDef.natGateways = {"strategy": NatGatewayStrategy.Single};
 console.log("vpcDef: ", vpcDef);

@@ -376,7 +376,7 @@ export class PulumiUtil {
                 sharedConfigFiles: [".aws/config"],
                 accessKey: "test",
                 secretKey: "test",
-                region: "us-west-2",
+                region: "us-east-1",
                 //    profile: 'localstack',
                 // list of supported features
                 // https://docs.localstack.cloud/aws/feature-coverage/
