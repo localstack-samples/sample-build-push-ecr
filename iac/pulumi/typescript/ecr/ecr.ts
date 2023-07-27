@@ -12,6 +12,6 @@ const myrepo = new awsx.ecr.Repository("myrepo", {
 
 const image = new awsx.ecr.Image("image", {
     repositoryUrl: myrepo.url,
-    path: "./app",
+    path: "../../../../app",
 }, { provider:  PulumiUtil.instance().awsProvider});
 export const myrepourl = myrepo.url;
