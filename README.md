@@ -37,6 +37,8 @@ source venv/bin/activate
 5. Start LocalStack
 
 ```shell
+# Export your LocalStack license key
+export LOCALSTACK_API_KEY=<your key>
 DEBUG=1 ENFORCE_IAM=1 localstack start
 ```
 
