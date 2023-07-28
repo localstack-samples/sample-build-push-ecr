@@ -4,6 +4,8 @@ This project uses mutliple IaC frameworks to deploy a Docker registry to AWS ECR
 and deploy the image to the ECR repo. Changes to files in the `./app` directory will cause the Docker
 image to be rebuilt with the tag `latest` and redeployed.
 
+!["Sample"](./docs/img/solution-diags.png "Sample")
+
 # Setup
 
 ### Assumptions

@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 
 -include envs.makefile
+-include nonenv.makefile
 
 .PHONY: clean update-deps delete-zips iac-shared local-top-level
 
