@@ -97,9 +97,24 @@ docker run --rm localhost.localstack.cloud:4510/myrepo
 
 6. Go back to step (3)
 
-# WIP - Pulumi IaC Instructions
+# Pulumi IaC with Docker Provider Instructions
+
+IaC files located at `./iac/pulumi/ts-docker-provider/ecr`
+
+### Deploy with Pulumi IaC
+
+```shell
+unset AWS_PROFILE
+```
+
+```shell
+make local-ecr-docker-deploy
+```
+
+# Pulumi Crosswalk IaC Instructions - Failing
 
 There is an issue with the ECR deployment to LocalStack in this IaC pipeline right now.
+IaC files located at `./iac/pulumi/typescript/ecr`
 
 ### Deploy with Pulumi IaC
 

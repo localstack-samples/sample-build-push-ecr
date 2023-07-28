@@ -23,9 +23,15 @@ local-cdktf%: export STACK_PREFIX=ecr
 local-ecr%: export STACK_DIR=iac/pulumi/typescript/ecr
 local-ecr%: export STACK_PREFIX=ecr
 
+local-ecr-docker%: export STACK_DIR=iac/pulumi/ts-docker-provider/ecr
+local-ecr-docker%: export STACK_PREFIX=ecrd
+
 local-toplevel%: export STACK_DIR=iac/pulumi/typescript/top-level
 local-toplevel%: export STACK_PREFIX=toplevel
 local-toplevel%: export VPC_CIDR_BLOCK=10.10.0.0/16
+
+local-toplevel-docker%: export STACK_DIR=iac/pulumi/ts-docker-provider/top-level
+local-toplevel-docker%: export STACK_PREFIX=topleveld
 
 #NONPROD pipeline vars
 non%: export DOCKER_DEFAULT_PLATFORM=linux/arm64
