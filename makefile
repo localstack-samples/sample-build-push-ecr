@@ -21,11 +21,22 @@ local-toplevel-destroy: destroy
 local-toplevel-preview: pulumi-preview
 local-toplevel-outputs: pulumi-outputs
 
+local-toplevel-docker-deploy: up-deploy
+local-toplevel-docker-destroy: destroy
+local-toplevel-docker-preview: pulumi-preview
+local-toplevel-docker-outputs: pulumi-outputs
+
 local-ecr-deploy: up-deploy
 local-ecr-destroy: destroy
 local-ecr-outputs: pulumi-outputs
 local-ecr-test: test
 local-ecr-unittest: unittest
+
+local-ecr-docker-deploy: up-deploy
+local-ecr-docker-destroy: destroy
+local-ecr-docker-outputs: pulumi-outputs
+local-ecr-docker-test: test
+local-ecr-docker-unittest: unittest
 
 local-cdktf-install: cdktfinstall
 local-cdktf-deploy: cdktfdeploy
@@ -35,7 +46,7 @@ local-destroy-all:
 	make local-toplevel-destroy
 
 iac-shared:
-	pushd ./iac/pulumi/typescript/iac-shared && yarn install && yarn run build && popd
+	pushd $(STACK_DIR)/../iac-shared && yarn install && yarn run build && popd
 
 stack-init: iac-shared
 	mkdir -p ./global-iac
@@ -49,7 +60,7 @@ cdktfinstall:
 	cd $(STACK_DIR) && npm install
 
 up-deploy: stack-init stack-init-application
-	pulumi up -ys $(STACK_PREFIX).$(STACK_SUFFIX) --cwd $(STACK_DIR)
+	pulumi up -ys $(STACK_PREFIX).$(STACK_SUFFIX) --cwd $(STACK_DIR) -v=4
 
 pulumi-preview: stack-init stack-init-application
 	pulumi preview --diff --cwd $(STACK_DIR)
