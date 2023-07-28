@@ -1,0 +1,3 @@
+name: lsecr
+runtime: nodejs
+description: LocalStack ECR Sample Top Level
