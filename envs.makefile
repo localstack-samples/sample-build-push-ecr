@@ -13,8 +13,13 @@ export STACK_SUFFIX=local
 export HOSTED_ZONE_NAME=non.local
 export ACTIVE_PROFILES=none
 
+
+
 # Pattern specific variables for each pipeline
 local-%: export LOCALSTACK=1
+local-cdktf%: export STACK_DIR=iac/terraform/cdk
+local-cdktf%: export STACK_PREFIX=ecr
+
 local-ecr%: export STACK_DIR=iac/pulumi/typescript/ecr
 local-ecr%: export STACK_PREFIX=ecr
 

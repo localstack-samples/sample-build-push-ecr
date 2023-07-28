@@ -16,24 +16,6 @@ update-deps: $(PKG_SUB_DIRS)
         pushd $$i && ncu -u && yarn install && popd; \
     done
 
-non-toplevel-deploy: up-deploy
-non-toplevel-destroy: destroy
-non-toplevel-preview: pulumi-preview
-non-toplevel-refresh: refresh
-
-non-db-deploy: up-deploy
-non-db-destroy: destroy
-non-db-refresh: refresh
-non-db-preview: pulumi-preview
-non-db-outputs: pulumi-outputs
-
-non-jump-deploy: up-deploy
-non-jump-destroy: destroy
-
-non-lsgdc-deploy: build up-deploy
-non-lsgdc-destroy: destroy
-non-lsgdc-refresh: refresh
-
 local-toplevel-deploy: up-deploy
 local-toplevel-destroy: destroy
 local-toplevel-preview: pulumi-preview
@@ -45,6 +27,8 @@ local-ecr-outputs: pulumi-outputs
 local-ecr-test: test
 local-ecr-unittest: unittest
 
+local-cdktf-install: cdktfinstall
+local-cdktf-deploy: cdktfdeploy
 
 local-destroy-all:
 	make local-ecr-destroy
@@ -57,6 +41,12 @@ stack-init: iac-shared
 	mkdir -p ./global-iac
 	pushd $(STACK_DIR) && yarn install && popd;
 	pulumi stack select -c $(STACK_PREFIX).$(STACK_SUFFIX) --non-interactive --cwd $(STACK_DIR)
+
+cdktfdeploy:
+	cd $(STACK_DIR) && cdktf deploy
+
+cdktfinstall:
+	cd $(STACK_DIR) && npm install
 
 up-deploy: stack-init stack-init-application
 	pulumi up -ys $(STACK_PREFIX).$(STACK_SUFFIX) --cwd $(STACK_DIR)
