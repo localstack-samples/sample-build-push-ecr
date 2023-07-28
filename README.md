@@ -99,4 +99,14 @@ docker run --rm localhost.localstack.cloud:4510/myrepo
 
 # WIP - Pulumi IaC Instructions
 
-There is an issue with the ECR deployment to LocalStack in this IaC pipeline right now. 
+There is an issue with the ECR deployment to LocalStack in this IaC pipeline right now.
+
+### Deploy with Pulumi IaC
+
+```shell
+unset AWS_PROFILE
+```
+
+```shell
+make local-ecr-deploy
+```

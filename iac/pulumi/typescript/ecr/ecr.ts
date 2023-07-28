@@ -7,11 +7,12 @@ const myrepo = new awsx.ecr.Repository("myrepo", {
     imageScanningConfiguration: {
         scanOnPush: true,
     },
+    // encryptionConfigurations:
     imageTagMutability: "MUTABLE",
-}, { provider:  PulumiUtil.instance().awsProvider});
+}, {provider: PulumiUtil.instance().awsProvider});
 
 const image = new awsx.ecr.Image("image", {
     repositoryUrl: myrepo.url,
     path: "../../../../app",
-}, { provider:  PulumiUtil.instance().awsProvider});
+}, {provider: PulumiUtil.instance().awsProvider});
 export const myrepourl = myrepo.url;
