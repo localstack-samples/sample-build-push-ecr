@@ -59,6 +59,42 @@ make local-cdktf-install
 make local-cdktf-deploy
 ```
 
-# Pulumi IaC Instructions
+## Terraform CDK Poking Around
 
-There is an issue with the ECR deployment to LocalStack in this repo right now. 
+Look in the `./app` directory to find the Dockerfile. You can modify it and re-run `make local-cdktf-deploy` and it will
+re-deploy.
+
+Look in the `./iac/terraform/cdk` directory to find the IaC project. Look at `main.ts` in there to see how the resources
+are created.
+
+### Dev Testing the Image
+
+#### Sample Workflow
+
+Assuming you've deployed everything above.
+
+1. Change the image. Modify the file `./app/Dockerfile`
+2. Run a container for our image
+
+```shell
+docker run --rm localhost.localstack.cloud:4510/myrepo
+```
+
+3. Update the `./app/Dockerfile` again
+4. Re-deploy
+
+```shell 
+make local-cdktf-deploy
+```
+
+5. Run the container for our image again, see the difference you made to the image.
+
+```shell
+docker run --rm localhost.localstack.cloud:4510/myrepo
+```
+
+6. Go back to step (3)
+
+# WIP - Pulumi IaC Instructions
+
+There is an issue with the ECR deployment to LocalStack in this IaC pipeline right now. 
