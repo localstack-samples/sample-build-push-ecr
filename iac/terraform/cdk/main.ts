@@ -31,16 +31,16 @@ import {DataAwsEcrAuthorizationToken} from "@cdktf/provider-aws/lib/data-aws-ecr
         constructor(scope: Construct, id: string, config: MyMultiStackConfig) {
             super(scope, id);
             // Default Docker registry auth for LocalStack Docker Desktop
-            let registryAuth: any = {
-                username: 'test',
-                password: 'test',
-                authDisabled: true
-            };
+            let registryAuth: any = {};
             console.log('config', config);
             console.log(registryAuth.username);
             // define resources here
             if (config.isLocal) {
                 console.log("LocalStack Deploy");
+                // Disable Docker auth
+                registryAuth = {
+                    authDisabled: true
+                };
                 // LocalStack AWS Provider
                 new AwsProvider(this, "AWS", {
                     region: config.region,
@@ -86,11 +86,14 @@ import {DataAwsEcrAuthorizationToken} from "@cdktf/provider-aws/lib/data-aws-ecr
 
             console.log(`auth username ${auth.userName}`);
             console.log('ecr url', myecr.repositoryUrl);
-            // registryAuth = Object.assign({}, registryAuth, {address: `${myecr.repositoryUrl}`});
-            registryAuth = Object.assign({}, registryAuth, {address: `${auth.proxyEndpoint}`});
+            registryAuth = Object.assign({}, registryAuth,
+                {
+                    address: auth.proxyEndpoint,
+                    username: auth.userName,
+                    password: auth.password
+                });
             console.log(`registry auth: `, registryAuth);
             new DockerProvider(this, "docker", {
-
                 registryAuth: [
                     registryAuth
                 ],
