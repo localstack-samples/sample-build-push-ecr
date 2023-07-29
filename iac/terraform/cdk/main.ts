@@ -94,18 +94,10 @@ import {DataAwsEcrAuthorizationToken} from "@cdktf/provider-aws/lib/data-aws-ecr
                 registryAuth: [
                     registryAuth
                 ],
-                // registryAuth: [
-                //     {
-                //         address: auth.proxyEndpoint,
-                //         username: auth.userName,
-                //         password: auth.password
-                //     }
-                // ]
             });
 
             const myimage = new Image(this, "myimage", {
                 name: `${myecr.repositoryUrl}:latest`,
-                // name: `${auth.proxyEndpoint}/${myecr.name}:latest`,
                 buildAttribute: {context: dockerAppDir},
                 keepLocally: false,
                 forceRemove: true,
