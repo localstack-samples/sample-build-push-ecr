@@ -1,7 +1,7 @@
 import {Construct} from "constructs";
-import {App, TerraformStack} from "cdktf";
+import {App, TerraformStack, S3Backend} from "cdktf";
 import {AwsProvider} from "@cdktf/provider-aws/lib/provider";
-import {S3Bucket} from "@cdktf/provider-aws/lib/s3-bucket"
+// import {S3Bucket} from "@cdktf/provider-aws/lib/s3-bucket"
 import {EcrRepository} from "@cdktf/provider-aws/lib/ecr-repository"
 import {DockerProvider} from "@cdktf/provider-docker/lib/provider";
 import {Image} from "@cdktf/provider-docker/lib/image";
@@ -12,6 +12,7 @@ import {hashFolder} from "./hashing";
 
 import {endpoints} from "./ls-endpoints";
 import {TerraformOutput} from "cdktf/lib";
+import {DataAwsEcrAuthorizationToken} from "@cdktf/provider-aws/lib/data-aws-ecr-authorization-token";
 
 (async () => {
 
@@ -19,42 +20,96 @@ import {TerraformOutput} from "cdktf/lib";
     const dockerAppHash: string = await hashFolder(dockerAppDir);
     console.log(dockerAppHash);
 
+    interface MyMultiStackConfig {
+        isLocal: boolean;
+        environment: string;
+        region?: string;
+    }
+
+
     class MyStack extends TerraformStack {
-        constructor(scope: Construct, id: string) {
+        constructor(scope: Construct, id: string, config: MyMultiStackConfig) {
             super(scope, id);
-
+            // Default Docker registry auth for LocalStack Docker Desktop
+            let registryAuth: any = {
+                username: 'test',
+                password: 'test',
+                authDisabled: true
+            };
+            console.log('config', config);
+            console.log(registryAuth.username);
             // define resources here
-            new AwsProvider(this, "AWS", {
-                region: "us-east-1",
-                accessKey: 'test',
-                secretKey: 'test',
-                s3UsePathStyle: true,
-                endpoints: endpoints
-            });
+            if (config.isLocal) {
+                console.log("LocalStack Deploy");
+                // LocalStack AWS Provider
+                new AwsProvider(this, "AWS", {
+                    region: config.region,
+                    accessKey: 'test',
+                    secretKey: 'test',
+                    s3UsePathStyle: true,
+                    endpoints: endpoints
+                });
 
-            new DockerProvider(this, "docker", {
-                registryAuth: [
-                    {
-                        address: 'localhost.localstack.cloud:4510',
-                        username: 'test',
-                        password: 'test'
-                    }
-                ],
 
-            });
+            } else {
+                console.log("AWS Deploy");
+                // AWS Live Deploy
+                // Use S3Backend
+                new S3Backend(this, {
+                    bucket: process.env.TERRAFORM_STATE_BUCKET ?? '',
+                    key: id,
+                    region: config.region
+                });
+                // Use AWS Provider with no LocalStack overrides
+                new AwsProvider(this, "AWS", {
+                    region: config.region
+                });
+                // Change registry auth for AWS ECR Credentials helper
+                registryAuth = {
+                    configFile: path.resolve() + '/dockerconfig.json'
+                }
+            }
 
-            const myecr = new EcrRepository(this, 'myrep', {
+            const myecr = new EcrRepository(this, 'myrepo', {
                 name: 'myrepo',
                 imageScanningConfiguration: {scanOnPush: true},
+                tags: {
+                    environment: config.environment,
+                }
+            });
 
+            const auth = new DataAwsEcrAuthorizationToken(this, `ecr-auth`,
+                {
+                    dependsOn: [myecr],
+                    registryId: myecr.registryId,
+                });
+
+            console.log(`auth username ${auth.userName}`);
+            console.log('ecr url', myecr.repositoryUrl);
+            // registryAuth = Object.assign({}, registryAuth, {address: `${myecr.repositoryUrl}`});
+            registryAuth = Object.assign({}, registryAuth, {address: `${auth.proxyEndpoint}`});
+            console.log(`registry auth: `, registryAuth);
+            new DockerProvider(this, "docker", {
+
+                registryAuth: [
+                    registryAuth
+                ],
+                // registryAuth: [
+                //     {
+                //         address: auth.proxyEndpoint,
+                //         username: auth.userName,
+                //         password: auth.password
+                //     }
+                // ]
             });
 
             const myimage = new Image(this, "myimage", {
                 name: `${myecr.repositoryUrl}:latest`,
+                // name: `${auth.proxyEndpoint}/${myecr.name}:latest`,
                 buildAttribute: {context: dockerAppDir},
                 keepLocally: false,
                 forceRemove: true,
-                triggers: {'hash': dockerAppHash}
+                triggers: {'hash': dockerAppHash},
             });
 
             new TerraformOutput(this, "myimageUrl", {
@@ -65,21 +120,30 @@ import {TerraformOutput} from "cdktf/lib";
                 value: myimage.name,
             });
 
+            new TerraformOutput(this, "proxyOtherName", {
+                value: `${auth.proxyEndpoint}/${myecr.name}:latest`,
+            });
+
             new RegistryImage(this, 'myecrimage', {
                 name: myimage.name,
                 insecureSkipVerify: true,
-                triggers: {'hash': dockerAppHash}
-            });
-
-            new S3Bucket(this, "bucket", {
-                bucket: "demo"
+                triggers: {'hash': dockerAppHash},
             });
         }
     }
 
 
     const app = new App();
-    new MyStack(app, "cdk");
+    new MyStack(app, "lsecr.local", {
+        isLocal: true,
+        environment: 'local',
+        region: 'us-east-1'
+    });
+    new MyStack(app, "lsecr.non", {
+        isLocal: false,
+        environment: 'non',
+        region: 'us-east-1'
+    });
     app.synth();
 })().catch(e => {
     // Deal with the fact the chain failed
