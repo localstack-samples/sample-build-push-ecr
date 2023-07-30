@@ -155,6 +155,18 @@ non%: export TERRAFORM_STATE_BUCKET=<your bucket name. ie my-happy-bucket-us-wes
 non%: export PULUMI_BACKEND_URL=s3://$(TERRAFORM_STATE_BUCKET)
 ```
 
+## Deploy to AWS with Pulumi
+
+```shell
+make non-ecr-docker-deploy
+```
+
+## Destroy the Deployed AWS Pulumi Stack
+
+```shell
+make non-ecr-docker-destroy
+```
+
 ## Deploy to AWS with Terraform-CDK
 
 ```shell

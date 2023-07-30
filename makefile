@@ -39,6 +39,10 @@ local-ecr-docker-outputs: pulumi-outputs
 local-ecr-docker-test: test
 local-ecr-docker-unittest: unittest
 
+non-ecr-docker-deploy: up-deploy
+non-ecr-docker-destroy: destroy
+non-ecr-docker-outputs: pulumi-outputs
+
 local-cdktf-install: cdktfinstall
 local-cdktf-deploy: cdktfdeploy
 local-cdktf-destroy: cdktfdestroy
