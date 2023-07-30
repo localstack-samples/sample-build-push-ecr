@@ -59,7 +59,8 @@ import {TerraformOutput} from "cdktf/lib";
             const myecr = new EcrRepository(this, 'myrepo', {
                 name: 'myrepo',
                 imageScanningConfiguration: {scanOnPush: true},
-
+                // Use forceDelete to allow deleting repo when images are in it
+                forceDelete: true,
                 tags: {
                     environment: config.environment,
                 }
@@ -68,7 +69,6 @@ import {TerraformOutput} from "cdktf/lib";
             const buildAndPush = new Null.resource.Resource(this, 'buildAndPush', {
                 dependsOn: [myecr],
                 triggers: {folderHash: dockerAppHash},
-
             });
             // Docker build and push
             let command = `

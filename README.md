@@ -135,8 +135,6 @@ to test their IaC pipelines locally before ever deploying them to a live AWS env
 
 ## Set Live AWS Credentials
 
-##
-
 However you set your credentials in your terminal, do it now.
 
 ## Add Environment Config
