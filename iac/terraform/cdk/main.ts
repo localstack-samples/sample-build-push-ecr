@@ -2,19 +2,11 @@ import {Construct} from "constructs";
 import {App, TerraformStack, S3Backend} from "cdktf";
 import {AwsProvider} from "@cdktf/provider-aws/lib/provider";
 import {EcrRepository} from "@cdktf/provider-aws/lib/ecr-repository"
-import {DockerProvider} from "@cdktf/provider-docker/lib/provider";
-import {Image} from "@cdktf/provider-docker/lib/image";
-import {RegistryImage} from "@cdktf/provider-docker/lib/registry-image";
+import * as Null from "@cdktf/provider-null";
 import * as path from 'path';
 import {hashFolder} from "./hashing";
-
 import {endpoints} from "./ls-endpoints";
 import {TerraformOutput} from "cdktf/lib";
-import {DataAwsEcrAuthorizationToken} from "@cdktf/provider-aws/lib/data-aws-ecr-authorization-token";
-
-// function removeHttp(url: string): string {
-//     return url.replace(/^https?:\/\//, '');
-// }
 
 (async () => {
 
@@ -32,21 +24,13 @@ import {DataAwsEcrAuthorizationToken} from "@cdktf/provider-aws/lib/data-aws-ecr
     class MyStack extends TerraformStack {
         constructor(scope: Construct, id: string, config: MyMultiStackConfig) {
             super(scope, id);
-            // Default Docker registry auth for LocalStack Docker Desktop
-            let registryNoAuth: any = {
-                authDisabled: true
-            };
-            // let host: string = "";
             console.log('config', config);
-            console.log(registryNoAuth.username);
+            // Create NullProvider to run CMD Line
+            new Null.provider.NullProvider(this, 'Null');
+
             // define resources here
             if (config.isLocal) {
                 console.log("LocalStack Deploy");
-                // host = "http://localhost.localstack.cloud";
-                // Disable Docker auth
-                // registryNoAuth = {
-                //     authDisabled: true
-                // };
                 // LocalStack AWS Provider
                 new AwsProvider(this, "AWS", {
                     region: config.region,
@@ -59,7 +43,6 @@ import {DataAwsEcrAuthorizationToken} from "@cdktf/provider-aws/lib/data-aws-ecr
 
             } else {
                 console.log("AWS Deploy");
-                // host = `764727150240.dkr.ecr.${config.region}.amazonaws.com`;
                 // AWS Live Deploy
                 // Use S3Backend
                 new S3Backend(this, {
@@ -71,19 +54,8 @@ import {DataAwsEcrAuthorizationToken} from "@cdktf/provider-aws/lib/data-aws-ecr
                 new AwsProvider(this, "AWS", {
                     region: config.region
                 });
-                // Change registry auth for AWS ECR Credentials helper
-                // Override the Docker registry config to use AWS ECR Credentials Helper
-                // registryNoAuth = {
-                //     configFile: path.resolve() + '/dockerconfig.json'
-                // }
-                // registryNoAuth = {
-                //     configFileContent: JSON.stringify({
-                //         "credsStore": "ecr-login"
-                //     })
-                // }
-
             }
-
+            // Create ECR Repository
             const myecr = new EcrRepository(this, 'myrepo', {
                 name: 'myrepo',
                 imageScanningConfiguration: {scanOnPush: true},
@@ -92,75 +64,32 @@ import {DataAwsEcrAuthorizationToken} from "@cdktf/provider-aws/lib/data-aws-ecr
                     environment: config.environment,
                 }
             });
+            // resource that runs the docker build and deploy commands
+            const buildAndPush = new Null.resource.Resource(this, 'buildAndPush', {
+                dependsOn: [myecr],
+                triggers: {folderHash: dockerAppHash},
 
-            const auth = new DataAwsEcrAuthorizationToken(this, `ecr-auth`,
-                {
-                    registryId: myecr.registryId,
-                });
-
-            const registryAuth = {
-                address: auth.proxyEndpoint,
-                username: auth.userName,
-                password: auth.password
+            });
+            // Docker build and push
+            let command = `
+      cd ${dockerAppDir} && docker build -t ${myecr.repositoryUrl} . &&
+      docker push ${myecr.repositoryUrl}
+    `;
+            // If NOT on LocalStack, assume AWS and prepend login
+            // needs AWS CLI v2
+            if (!config.isLocal) {
+                command = `
+      aws ecr get-login-password --region ${config.region} |
+      docker login --username AWS --password-stdin ${myecr.repositoryUrl} &&
+      ` + command;
             }
-            registryNoAuth = Object.assign({}, registryNoAuth, registryAuth);
-            const dockerNoAuth = new DockerProvider(this, "docker-no-auth", {
-                alias: 'docker-no-auth',
-                // host: 'http://localhost.localstack.cloud:4510',
-                registryAuth: [
-                    registryNoAuth,
-                    // {
-                    //     address: auth.proxyEndpoint,
-                    //     username: auth.userName,
-                    //     password: auth.password
-                    // }
-                ],
-            });
+            buildAndPush.addOverride('provisioner.local-exec.command', command);
 
-            const dockerAuth = new DockerProvider(this, "docker-auth", {
-                // host: 'http://localhost.localstack.cloud:4510',
-                alias: 'docker-auth',
-                registryAuth: [
-                    registryAuth,
-                    // {
-                    //     address: auth.proxyEndpoint,
-                    //     username: auth.userName,
-                    //     password: auth.password
-                    // }
-                ],
-            });
-
-            const myimage = new Image(this, "myimage", {
-                name: `${myecr.repositoryUrl}:latest`,
-                // name: `${auth.proxyEndpoint}/myrepo:latest`,
-                buildAttribute: {context: dockerAppDir},
-                keepLocally: false,
-                forceRemove: true,
-                triggers: {'hash': dockerAppHash},
-                provider: dockerNoAuth,
-            });
-
-            let dockerProvider = dockerAuth;
-            if (config.isLocal) dockerProvider = dockerNoAuth;
-            new RegistryImage(this, 'myecrimage', {
-                name: myimage.name,
-                insecureSkipVerify: true,
-                triggers: {'hash': dockerAppHash},
-                provider: dockerProvider
-            });
-            //
-            //
+            // Output the ECR Repository URL
             new TerraformOutput(this, "myimageUrl", {
                 value: myecr.repositoryUrl,
             });
 
-            new TerraformOutput(this, "myimageName", {
-                value: myimage.name,
-            });
-            //
-            // new TerraformOutput(this, "proxyOtherName", {
-            //     value: `${auth.proxyEndpoint}/${myecr.name}:latest`,
-            // });
         }
     }
 
