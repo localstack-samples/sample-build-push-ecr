@@ -20,8 +20,8 @@
     "node": ">=16.0"
   },
   "dependencies": {
-    "@cdktf/provider-aws": "15.0.0",
-    "@cdktf/provider-azurerm": "^9.0.4",
+    "@cdktf/provider-aws": "16.0.5",
+    "@cdktf/provider-azurerm": "^9.0.5",
     "@cdktf/provider-docker": "^8.0.0",
     "@cdktf/provider-null": "^7.0.0",
     "cdktf": "^0.17.3",

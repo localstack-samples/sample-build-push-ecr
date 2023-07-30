@@ -41,6 +41,10 @@ non%: export AWS_ACCOUNT_TYPE=NONPROD
 non%: export AWS_REGION=us-east-1
 non%: export STACK_SUFFIX=non
 
+non-cdktf%: export STACK_DIR=iac/terraform/cdk
+non-cdktf%: export STACK_PREFIX=ecr
+
+
 non-toplevel%: export STACK_DIR=iac/top-level
 non-toplevel%: export STACK_PREFIX=toplevel
 non-toplevel%: export VPC_CIDR_BLOCK=10.72.0.0/16
@@ -50,3 +54,5 @@ non-ecr-docker%: export STACK_PREFIX=ecrd
 
 uname_m := $(shell uname -m) # store the output of the command in a variable
 export LOCAL_ARCH=$(uname_m)
+
+export TFSTACK_NAME=lsecr.$(STACK_SUFFIX)

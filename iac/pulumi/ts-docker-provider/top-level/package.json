@@ -4,11 +4,11 @@
     "@types/node": "^20.4.5"
   },
   "dependencies": {
-    "@aws-sdk/client-cloudfront": "^3.378.0",
-    "@aws-sdk/credential-providers": "^3.378.0",
+    "@aws-sdk/client-cloudfront": "^3.380.0",
+    "@aws-sdk/credential-providers": "^3.379.1",
     "@pulumi/aws": "5.42.0",
     "@pulumi/awsx": "^1.0.2",
-    "@pulumi/command": "^0.7.2",
+    "@pulumi/command": "^0.8.0",
     "@pulumi/postgresql": "^3.9.0",
     "@pulumi/pulumi": "^3.76.1"
   }

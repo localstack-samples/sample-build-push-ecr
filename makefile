@@ -41,6 +41,10 @@ local-ecr-docker-unittest: unittest
 
 local-cdktf-install: cdktfinstall
 local-cdktf-deploy: cdktfdeploy
+local-cdktf-destroy: cdktfdestroy
+
+non-cdktf-deploy: cdktfdeploy
+non-cdktf-destroy: cdktfdestroy
 
 local-destroy-all:
 	make local-ecr-destroy
@@ -55,7 +59,10 @@ stack-init: iac-shared
 	pulumi stack select -c $(STACK_PREFIX).$(STACK_SUFFIX) --non-interactive --cwd $(STACK_DIR)
 
 cdktfdeploy:
-	cd $(STACK_DIR) && cdktf deploy
+	cd $(STACK_DIR) && cdktf deploy $(TFSTACK_NAME)
+
+cdktfdestroy:
+	cd $(STACK_DIR) && cdktf destroy $(TFSTACK_NAME)
 
 cdktfinstall:
 	cd $(STACK_DIR) && npm install

@@ -127,3 +127,42 @@ unset AWS_PROFILE
 ```shell
 make local-ecr-deploy
 ```
+
+# AWS Deploy Instructions
+
+We use the same IaC pipelines to deploy to AWS! This is a very important point that LocalStack enables teams
+to test their IaC pipelines locally before ever deploying them to a live AWS environment.
+
+## Set Live AWS Credentials
+
+However you set your credentials in your terminal, do it now.
+
+## Add Environment Config
+
+This project stores Terraform state in an AWS S3 bucket in the target account.
+Create an S3 bucket in your target account to hold the Terraform state
+
+```shell
+aws s3 mb s3://<name of your bucket>-<region where bucket is> --region <region where your bucket is>
+# enable versioning in case of state corruption
+aws s3api put-bucket-versioning --bucket <your full bucket name> --versioning-configuration Status=Enabled
+```
+
+Create a file called `nonenv.makefile` at the root of this project.
+
+```makefile
+non%: export TERRAFORM_STATE_BUCKET=<your bucket name. ie my-happy-bucket-us-west-2>
+non%: export PULUMI_BACKEND_URL=s3://$(TERRAFORM_STATE_BUCKET)
+```
+
+## Deploy to AWS with Terraform-CDK
+
+```shell
+make non-cdktf-deploy
+```
+
+## Destroy the Deployed Stack
+
+```shell
+make non-cdktf-destroy
+```
