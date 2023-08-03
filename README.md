@@ -113,6 +113,14 @@ unset AWS_PROFILE
 make local-ecr-docker-deploy
 ```
 
+### Pulumi Cleanup
+
+When you restart LocalStack, you want to cleanup the local Pulumi state.
+
+```shell
+make local-pulumi-clean
+```
+
 # Pulumi Crosswalk IaC Instructions - Failing
 
 There is an issue with the ECR deployment to LocalStack in this IaC pipeline right now.

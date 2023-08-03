@@ -74,6 +74,9 @@ cdktfinstall:
 up-deploy: stack-init stack-init-application
 	pulumi up -ys $(STACK_PREFIX).$(STACK_SUFFIX) --cwd $(STACK_DIR) -v=4
 
+local-pulumi-clean:
+	rm -rf global-iac
+
 pulumi-preview: stack-init stack-init-application
 	pulumi preview --diff --cwd $(STACK_DIR)
 
