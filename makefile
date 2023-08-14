@@ -17,6 +17,12 @@ update-deps: $(PKG_SUB_DIRS)
         pushd $$i && ncu -u && yarn install && popd; \
     done
 
+start-localstack:
+	docker compose up
+
+stop-localstack:
+	docker compose down
+
 local-toplevel-deploy: up-deploy
 local-toplevel-destroy: destroy
 local-toplevel-preview: pulumi-preview
